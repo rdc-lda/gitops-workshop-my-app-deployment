@@ -1,9 +1,0 @@
-apiVersion: v1
-kind: Pod
-metadata:
-  name: my-app
-spec:
-  containers:
-    - name: main
-      image: registry.tekqube.lan:32000/gitops-workshop/my-app:v1
-      imagePullPolicy: IfNotPresent

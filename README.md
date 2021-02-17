@@ -94,22 +94,34 @@ $ git push
 
 > As you could see, the overlay outputs (for now) the same as the base configuration - this is just the starting point for modifications in the next chapters.
 
-## Lab 1: Change the name prefix
+## Lab 1: Set a name prefix
 
-```
-cd overlays/dev
-kustomize edit set nameprefix ${username}-
-git diff
-kustomize build
-git commit -am "set name prefix"
-git push
-```
+In order to prevent clashes between resources in a namespace (we do not want someone else to delete or modify our resources), we can prefix our resource definitions.
 
-### 7. Open Argo CD And Create Your App
+Kustomize CLI has a feature which enables this in our `kustomization.yaml` file; as a result all our resources are automatically prefixed when we generate our manifests.
 
-* Open https://argo-cd-kubecon.apps.argoproj.io/
-* Click "Login Via Github"
-* Click "New application"
+~~~bash
+# Change to the directory containing your 
+# customization.yaml file and add prefix
+$ cd overlays/dev
+$ kustomize edit set nameprefix ${username}-
+
+# What was the result of this command?
+$ git diff
+
+# Run (and see updated output)
+$ kustomize build
+
+# Pushto Git
+$ git commit -am "set name prefix"
+$ git push
+~~~
+
+## Lab 2: Open Argo CD and create your app
+
+* Open https://argocd.console.tekqube.lan/
+* Login using admin
+* Click "Create application"
 
 | Field | Value |
 |-------|-------|
@@ -122,44 +134,63 @@ git push
 | Cluster: | `https://kubernetes.default.svc` |
 | Namespace: | `default` |
   
-### 8. Sync Your App
+Next, sync your app by either:
 
 * Click "Sync".
 * Click "Synchronize" in the Sliding panel.
 
-### 9. Upgrade Your App
+## Lab 2: Upgrade your app
 
-```
-kustomize edit set image gitopsworkshop/my-app:v2
-git diff
-kustomize build
-```
+For this exercise, we are going to set the image to something non-existent...
 
-```
-git commit -am "upgrade to version 2"
-git push
-```
+~~~bash
+# Set the image
+$ kustomize edit set image registry.tekqube.lan:32000/gitops-workshop/my-app:v2
+
+# See the differences & build to verify changes
+$ git diff
+$ kustomize build
+~~~
+
+Next, we push this change to our Git repo:
+
+~~~bash
+# Commit & push
+$ git commit -am "upgrade to version 2"
+$ git push
+~~~
+
+Within the ArgoCD dashboard:
 
 * Detect git changes: "Refresh"
 * Preview Differences: "App Diff"
 * Deploy New Version: "Sync"
 
-### 10. Troubleshoot Degraded App
+## Lab 3: Troubleshoot a degraded app
+
+Within the ArgoCD dashboard:
 
 1. Open app
 2. Find the red heart
 3. Clik on the resource and check each tab
 
-### 11. Emergency Rollback
+## Lab 4: An emergency rollback
+
+Within the ArgoCD dashboard:
 
 * Click "History And Rollback"
-* Click "..." button in the last row
+* Click "..." button previous commit which was successful
 * Click "Rollback"
 * Click "Ok" in the modal panel
 
-### 12. GitOps Rollback
+All is good now, but our DC is out-of-sync...
 
-```
-git revert $(git rev-parse HEAD)
-git push
-```
+With Git commands, you can could also revert back:
+
+~~~bash
+# Revert the commit with ID...
+$ git revert $(git rev-parse HEAD)
+$ git push
+~~~
+
+...and now in our CD tool we are back - next to back in business - also back in sync!
